@@ -21,6 +21,7 @@ export type Database = {
           ended_at: string | null
           feedback: string | null
           id: string
+          process_id: string | null
           scenario: string
           started_at: string
           transcript: Json | null
@@ -31,6 +32,7 @@ export type Database = {
           ended_at?: string | null
           feedback?: string | null
           id?: string
+          process_id?: string | null
           scenario: string
           started_at?: string
           transcript?: Json | null
@@ -41,9 +43,45 @@ export type Database = {
           ended_at?: string | null
           feedback?: string | null
           id?: string
+          process_id?: string | null
           scenario?: string
           started_at?: string
           transcript?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversations_process_id_fkey"
+            columns: ["process_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_base"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      knowledge_base: {
+        Row: {
+          category: string
+          content: string
+          created_at: string
+          id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          content: string
+          created_at?: string
+          id?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          content?: string
+          created_at?: string
+          id?: string
+          title?: string
+          updated_at?: string
         }
         Relationships: []
       }

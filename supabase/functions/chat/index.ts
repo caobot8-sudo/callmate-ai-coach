@@ -11,28 +11,53 @@ serve(async (req) => {
   }
 
   try {
-    const { messages, scenario, customerProfile } = await req.json();
+    const { messages, scenario, customerProfile, processId } = await req.json();
     
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    // System prompt based on scenario and customer profile
-    const systemPrompt = `Você é um cliente do Banco Itaú em um cenário de atendimento.
+    // Fetch process content if processId is provided
+    let processContent = "";
+    if (processId) {
+      const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+      const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+      
+      const processResponse = await fetch(
+        `${supabaseUrl}/rest/v1/knowledge_base?id=eq.${processId}&select=content`,
+        {
+          headers: {
+            "apikey": supabaseKey,
+            "Authorization": `Bearer ${supabaseKey}`,
+          },
+        }
+      );
+
+      if (processResponse.ok) {
+        const processData = await processResponse.json();
+        if (processData && processData.length > 0) {
+          processContent = processData[0].content;
+        }
+      }
+    }
+
+    // System prompt based on scenario, customer profile, and process content
+    let systemPrompt = `Você é um cliente do Banco Itaú em um cenário de atendimento.
 
 CENÁRIO: ${scenario}
 PERFIL DO CLIENTE: ${customerProfile}
+${processContent ? `\n--- PROCESSO OPERACIONAL (USE COMO BASE) ---\n${processContent}\n--- FIM DO PROCESSO ---\n` : ""}
 
 INSTRUÇÕES IMPORTANTES:
 - Atue como esse cliente específico, mantendo as características emocionais do perfil
-- Seja realista e consistente com a situação apresentada
+- Seja realista e consistente com a situação apresentada${processContent ? " e com o processo operacional fornecido" : ""}
 - Responda de forma natural e humana
 - Se o perfil for "irritado", demonstre frustração apropriada
 - Se o perfil for "calmo", seja educado e paciente
 - Se o perfil for "confuso", faça perguntas e demonstre dúvidas
 - Não revele que é uma IA
-- Mantenha respostas concisas (máximo 3-4 frases)`;
+- Mantenha respostas concisas (máximo 3-4 frases)${processContent ? "\n- Base suas expectativas e respostas no processo operacional fornecido acima" : ""}`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",

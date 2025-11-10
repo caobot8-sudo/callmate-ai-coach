@@ -16,10 +16,11 @@ interface Message {
 interface ChatInterfaceProps {
   scenario: string;
   customerProfile: string;
+  processId?: string;
   onBack: () => void;
 }
 
-const ChatInterface = ({ scenario, customerProfile, onBack }: ChatInterfaceProps) => {
+const ChatInterface = ({ scenario, customerProfile, processId, onBack }: ChatInterfaceProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -38,7 +39,6 @@ const ChatInterface = ({ scenario, customerProfile, onBack }: ChatInterfaceProps
   } = useSpeechRecognition();
 
   useEffect(() => {
-    // Start conversation with AI
     startConversation();
   }, []);
 
@@ -68,13 +68,13 @@ const ChatInterface = ({ scenario, customerProfile, onBack }: ChatInterfaceProps
   const startConversation = async () => {
     setIsLoading(true);
     try {
-      // Create conversation record
       const { data: conv, error: convError } = await supabase
         .from('conversations')
         .insert({
           scenario,
           customer_profile: customerProfile,
           transcript: JSON.stringify([]),
+          process_id: processId || null,
         })
         .select()
         .single();
@@ -82,12 +82,12 @@ const ChatInterface = ({ scenario, customerProfile, onBack }: ChatInterfaceProps
       if (convError) throw convError;
       setConversationId(conv.id);
 
-      // Get first message from AI
       const { data, error } = await supabase.functions.invoke('chat', {
         body: {
           messages: [],
           scenario,
           customerProfile,
+          processId: processId || null,
         },
       });
 
@@ -96,7 +96,6 @@ const ChatInterface = ({ scenario, customerProfile, onBack }: ChatInterfaceProps
       const aiMessage: Message = { role: 'assistant', content: data.message };
       setMessages([aiMessage]);
 
-      // Update conversation with first message
       await supabase
         .from('conversations')
         .update({ transcript: JSON.stringify([aiMessage]) })
@@ -129,6 +128,7 @@ const ChatInterface = ({ scenario, customerProfile, onBack }: ChatInterfaceProps
           messages: updatedMessages,
           scenario,
           customerProfile,
+          processId: processId || null,
         },
       });
 
@@ -138,7 +138,6 @@ const ChatInterface = ({ scenario, customerProfile, onBack }: ChatInterfaceProps
       const finalMessages = [...updatedMessages, aiMessage];
       setMessages(finalMessages);
 
-      // Update conversation
       if (conversationId) {
         await supabase
           .from('conversations')
@@ -182,7 +181,6 @@ const ChatInterface = ({ scenario, customerProfile, onBack }: ChatInterfaceProps
 
       setEvaluation(data);
 
-      // Update conversation with evaluation
       if (conversationId) {
         await supabase
           .from('conversations')
