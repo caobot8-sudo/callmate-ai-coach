@@ -2,9 +2,10 @@ import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, Send, Loader2 } from "lucide-react";
+import { ArrowLeft, Send, Loader2, Mic, MicOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 import EvaluationResults from "./EvaluationResults";
 
 interface Message {
@@ -27,6 +28,14 @@ const ChatInterface = ({ scenario, customerProfile, onBack }: ChatInterfaceProps
   const [evaluation, setEvaluation] = useState<any>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  const { 
+    isListening, 
+    transcript, 
+    isSupported, 
+    startListening, 
+    stopListening,
+    resetTranscript 
+  } = useSpeechRecognition();
 
   useEffect(() => {
     // Start conversation with AI
@@ -36,6 +45,21 @@ const ChatInterface = ({ scenario, customerProfile, onBack }: ChatInterfaceProps
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  useEffect(() => {
+    if (transcript) {
+      setInput(transcript);
+    }
+  }, [transcript]);
+
+  const toggleListening = () => {
+    if (isListening) {
+      stopListening();
+    } else {
+      resetTranscript();
+      startListening();
+    }
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -245,23 +269,48 @@ const ChatInterface = ({ scenario, customerProfile, onBack }: ChatInterfaceProps
 
         {/* Input */}
         <div className="bg-card rounded-b-2xl border-t p-4 shadow-elegant">
+          {!isSupported && (
+            <div className="mb-2 text-xs text-muted-foreground text-center">
+              ⚠️ Reconhecimento de voz não disponível neste navegador
+            </div>
+          )}
           <div className="flex gap-2">
+            {isSupported && (
+              <Button
+                onClick={toggleListening}
+                disabled={isLoading}
+                variant={isListening ? "destructive" : "outline"}
+                className={isListening ? "animate-pulse" : ""}
+                size="icon"
+              >
+                {isListening ? (
+                  <MicOff className="w-4 h-4" />
+                ) : (
+                  <Mic className="w-4 h-4" />
+                )}
+              </Button>
+            )}
             <Input
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-              placeholder="Digite sua mensagem..."
-              disabled={isLoading}
+              onKeyPress={(e) => e.key === 'Enter' && !isListening && sendMessage()}
+              placeholder={isListening ? "Escutando... Fale agora!" : "Digite ou fale sua mensagem..."}
+              disabled={isLoading || isListening}
               className="flex-1"
             />
             <Button
               onClick={sendMessage}
-              disabled={isLoading || !input.trim()}
+              disabled={isLoading || !input.trim() || isListening}
               className="bg-secondary hover:bg-secondary/90"
             >
               <Send className="w-4 h-4" />
             </Button>
           </div>
+          {isListening && (
+            <div className="mt-2 text-xs text-center text-muted-foreground">
+              🎤 Gravando... Clique no microfone novamente para parar
+            </div>
+          )}
         </div>
       </div>
     </div>
