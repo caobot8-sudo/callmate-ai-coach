@@ -41,7 +41,7 @@ export const useSpeechRecognition = () => {
     if (SpeechRecognition) {
       setIsSupported(true);
       const recognitionInstance = new SpeechRecognition();
-      recognitionInstance.continuous = false;
+      recognitionInstance.continuous = true;
       recognitionInstance.interimResults = true;
       recognitionInstance.lang = 'pt-BR';
 
