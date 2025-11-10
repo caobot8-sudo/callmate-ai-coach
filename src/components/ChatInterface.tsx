@@ -53,10 +53,11 @@ const ChatInterface = ({ scenario, customerProfile, processId, onBack }: ChatInt
 
   useEffect(() => {
     if (transcript && !isListening && isRecording) {
+      console.log('Transcript captured:', transcript);
       setInput(transcript);
       handleRecordingComplete();
     }
-  }, [transcript, isListening]);
+  }, [transcript, isListening, isRecording]);
 
   useEffect(() => {
     return () => {
@@ -91,8 +92,16 @@ const ChatInterface = ({ scenario, customerProfile, processId, onBack }: ChatInt
   const stopRecording = () => {
     if (!isRecording) return;
     
+    console.log('Stopping recording, current transcript:', transcript);
     stopListening();
-    handleRecordingComplete();
+    
+    // Wait a bit for the final transcript to be processed
+    setTimeout(() => {
+      if (transcript) {
+        setInput(transcript);
+      }
+      handleRecordingComplete();
+    }, 300);
   };
 
   const cancelRecording = () => {

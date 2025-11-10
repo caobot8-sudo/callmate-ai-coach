@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 interface SpeechRecognitionEvent extends Event {
   results: SpeechRecognitionResultList;
@@ -34,6 +34,7 @@ export const useSpeechRecognition = () => {
   const [transcript, setTranscript] = useState('');
   const [isSupported, setIsSupported] = useState(false);
   const [recognition, setRecognition] = useState<ISpeechRecognition | null>(null);
+  const accumulatedTranscriptRef = useRef('');
 
   useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -47,6 +48,7 @@ export const useSpeechRecognition = () => {
 
       recognitionInstance.onstart = () => {
         setIsListening(true);
+        accumulatedTranscriptRef.current = '';
       };
 
       recognitionInstance.onend = () => {
@@ -66,7 +68,14 @@ export const useSpeechRecognition = () => {
           }
         }
 
-        setTranscript(finalTranscript || interimTranscript);
+        if (finalTranscript) {
+          accumulatedTranscriptRef.current = (accumulatedTranscriptRef.current + ' ' + finalTranscript).trim();
+          console.log('Accumulated transcript:', accumulatedTranscriptRef.current);
+        }
+
+        const currentTranscript = (accumulatedTranscriptRef.current + ' ' + interimTranscript).trim();
+        console.log('Current transcript:', currentTranscript);
+        setTranscript(currentTranscript);
       };
 
       recognitionInstance.onerror = (event: SpeechRecognitionErrorEvent) => {
@@ -83,6 +92,7 @@ export const useSpeechRecognition = () => {
   const startListening = useCallback(() => {
     if (recognition && !isListening) {
       setTranscript('');
+      accumulatedTranscriptRef.current = '';
       try {
         recognition.start();
       } catch (error) {
@@ -99,6 +109,7 @@ export const useSpeechRecognition = () => {
 
   const resetTranscript = useCallback(() => {
     setTranscript('');
+    accumulatedTranscriptRef.current = '';
   }, []);
 
   return {
