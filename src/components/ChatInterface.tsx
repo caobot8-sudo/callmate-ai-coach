@@ -27,7 +27,12 @@ const ChatInterface = ({ scenario, customerProfile, processId, onBack }: ChatInt
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [showEvaluation, setShowEvaluation] = useState(false);
   const [evaluation, setEvaluation] = useState<any>(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingTime, setRecordingTime] = useState(0);
+  const [startY, setStartY] = useState<number | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const recordingTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const micButtonRef = useRef<HTMLButtonElement>(null);
   const { toast } = useToast();
   const { 
     isListening, 
@@ -47,17 +52,103 @@ const ChatInterface = ({ scenario, customerProfile, processId, onBack }: ChatInt
   }, [messages]);
 
   useEffect(() => {
-    if (transcript) {
+    if (transcript && !isListening && isRecording) {
       setInput(transcript);
+      handleRecordingComplete();
     }
-  }, [transcript]);
+  }, [transcript, isListening]);
 
-  const toggleListening = () => {
-    if (isListening) {
-      stopListening();
-    } else {
-      resetTranscript();
-      startListening();
+  useEffect(() => {
+    return () => {
+      if (recordingTimerRef.current) {
+        clearInterval(recordingTimerRef.current);
+      }
+    };
+  }, []);
+
+  const handleRecordingComplete = () => {
+    setIsRecording(false);
+    setRecordingTime(0);
+    if (recordingTimerRef.current) {
+      clearInterval(recordingTimerRef.current);
+      recordingTimerRef.current = null;
+    }
+  };
+
+  const startRecording = () => {
+    if (isLoading) return;
+    
+    setIsRecording(true);
+    setRecordingTime(0);
+    resetTranscript();
+    startListening();
+    
+    recordingTimerRef.current = setInterval(() => {
+      setRecordingTime(prev => prev + 1);
+    }, 1000);
+  };
+
+  const stopRecording = () => {
+    if (!isRecording) return;
+    
+    stopListening();
+    handleRecordingComplete();
+  };
+
+  const cancelRecording = () => {
+    if (!isRecording) return;
+    
+    stopListening();
+    resetTranscript();
+    setInput("");
+    handleRecordingComplete();
+    
+    toast({
+      title: "Gravação cancelada",
+      variant: "default",
+    });
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setStartY(e.clientY);
+    startRecording();
+  };
+
+  const handleMouseUp = () => {
+    stopRecording();
+    setStartY(null);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (isRecording && startY !== null) {
+      const deltaY = startY - e.clientY;
+      if (deltaY > 50) {
+        cancelRecording();
+        setStartY(null);
+      }
+    }
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    setStartY(touch.clientY);
+    startRecording();
+  };
+
+  const handleTouchEnd = () => {
+    stopRecording();
+    setStartY(null);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (isRecording && startY !== null) {
+      const touch = e.touches[0];
+      const deltaY = startY - touch.clientY;
+      if (deltaY > 50) {
+        cancelRecording();
+        setStartY(null);
+      }
     }
   };
 
@@ -272,43 +363,56 @@ const ChatInterface = ({ scenario, customerProfile, processId, onBack }: ChatInt
               ⚠️ Reconhecimento de voz não disponível neste navegador
             </div>
           )}
+          
+          {isRecording && (
+            <div className="mb-3 flex items-center justify-center gap-3 text-sm">
+              <div className="flex items-center gap-2 text-destructive animate-pulse">
+                <div className="w-2 h-2 rounded-full bg-destructive" />
+                <span className="font-medium">{new Date(recordingTime * 1000).toISOString().substr(14, 5)}</span>
+              </div>
+              <span className="text-muted-foreground">Deslize para cima para cancelar</span>
+            </div>
+          )}
+          
           <div className="flex gap-2">
             {isSupported && (
-              <Button
-                onClick={toggleListening}
-                disabled={isLoading}
-                variant={isListening ? "destructive" : "outline"}
-                className={isListening ? "animate-pulse" : ""}
-                size="icon"
-              >
-                {isListening ? (
-                  <MicOff className="w-4 h-4" />
-                ) : (
+              <div className="relative">
+                <Button
+                  ref={micButtonRef}
+                  onMouseDown={handleMouseDown}
+                  onMouseUp={handleMouseUp}
+                  onMouseMove={handleMouseMove}
+                  onMouseLeave={() => isRecording && stopRecording()}
+                  onTouchStart={handleTouchStart}
+                  onTouchEnd={handleTouchEnd}
+                  onTouchMove={handleTouchMove}
+                  disabled={isLoading}
+                  variant={isRecording ? "destructive" : "outline"}
+                  className={`touch-none select-none transition-all ${
+                    isRecording ? "scale-110 animate-pulse shadow-lg" : ""
+                  }`}
+                  size="icon"
+                >
                   <Mic className="w-4 h-4" />
-                )}
-              </Button>
+                </Button>
+              </div>
             )}
             <Input
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && !isListening && sendMessage()}
-              placeholder={isListening ? "Escutando... Fale agora!" : "Digite ou fale sua mensagem..."}
-              disabled={isLoading || isListening}
+              onKeyPress={(e) => e.key === 'Enter' && !isRecording && sendMessage()}
+              placeholder={isRecording ? "Gravando áudio..." : "Digite ou segure o microfone para falar..."}
+              disabled={isLoading || isRecording}
               className="flex-1"
             />
             <Button
               onClick={sendMessage}
-              disabled={isLoading || !input.trim() || isListening}
+              disabled={isLoading || !input.trim() || isRecording}
               className="bg-secondary hover:bg-secondary/90"
             >
               <Send className="w-4 h-4" />
             </Button>
           </div>
-          {isListening && (
-            <div className="mt-2 text-xs text-center text-muted-foreground">
-              🎤 Gravando... Clique no microfone novamente para parar
-            </div>
-          )}
         </div>
       </div>
     </div>
