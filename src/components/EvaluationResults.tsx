@@ -1,8 +1,10 @@
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { TrendingUp, Heart, CheckCircle2, MessageSquare, Shield, ArrowLeft, Target } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { TrendingUp, Heart, CheckCircle2, MessageSquare, Shield, ArrowLeft, Target, Lightbulb } from "lucide-react";
 
 interface Principio {
   nota: number;
@@ -38,6 +40,15 @@ interface EvaluationProps {
 }
 
 const EvaluationResults = ({ evaluation, onBack }: EvaluationProps) => {
+  const [showTipsDialog, setShowTipsDialog] = useState(false);
+
+  useEffect(() => {
+    // Mostrar popup de dicas se probabilidade de aceitação for muito baixa
+    if (evaluation.probabilidade_aceitacao <= 20) {
+      setShowTipsDialog(true);
+    }
+  }, [evaluation.probabilidade_aceitacao]);
+
   const getScoreColor = (score: number) => {
     if (score >= 8) return "text-green-600";
     if (score >= 6) return "text-yellow-600";
@@ -69,6 +80,93 @@ const EvaluationResults = ({ evaluation, onBack }: EvaluationProps) => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted p-4">
+      {/* Dialog de Dicas de Abordagem */}
+      <Dialog open={showTipsDialog} onOpenChange={setShowTipsDialog}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-2xl">
+              <Lightbulb className="w-6 h-6 text-yellow-500" />
+              Dicas para Melhorar sua Abordagem
+            </DialogTitle>
+            <DialogDescription>
+              A probabilidade de aceitação está baixa. Aqui estão algumas orientações para melhorar sua técnica de venda:
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 mt-4">
+            <Card className="border-blue-200 bg-blue-50">
+              <CardHeader>
+                <CardTitle className="text-lg text-blue-900">1. Construa Rapport Antes de Vender</CardTitle>
+              </CardHeader>
+              <CardContent className="text-sm text-blue-800">
+                <p className="mb-2">• Comece a conversa de forma natural e empática</p>
+                <p className="mb-2">• Demonstre interesse genuíno nas necessidades do cliente</p>
+                <p>• Crie conexão antes de apresentar produtos</p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-green-200 bg-green-50">
+              <CardHeader>
+                <CardTitle className="text-lg text-green-900">2. Identifique Necessidades Primeiro</CardTitle>
+              </CardHeader>
+              <CardContent className="text-sm text-green-800">
+                <p className="mb-2">• Faça perguntas abertas sobre a situação do cliente</p>
+                <p className="mb-2">• Ouça ativamente e identifique pontos de dor</p>
+                <p>• Só ofereça soluções que fazem sentido para o perfil</p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-purple-200 bg-purple-50">
+              <CardHeader>
+                <CardTitle className="text-lg text-purple-900">3. Apresente Benefícios, Não Apenas Produtos</CardTitle>
+              </CardHeader>
+              <CardContent className="text-sm text-purple-800">
+                <p className="mb-2">• Conecte o produto com as necessidades identificadas</p>
+                <p className="mb-2">• Fale em termos de proteção, segurança e tranquilidade</p>
+                <p>• Use exemplos práticos e relevantes</p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-orange-200 bg-orange-50">
+              <CardHeader>
+                <CardTitle className="text-lg text-orange-900">4. Antecipe e Trate Objeções</CardTitle>
+              </CardHeader>
+              <CardContent className="text-sm text-orange-800">
+                <p className="mb-2">• Valide a preocupação do cliente antes de contra-argumentar</p>
+                <p className="mb-2">• Use técnicas como "Entendo que..." antes de explicar</p>
+                <p className="mb-2">• Forneça dados concretos quando possível</p>
+                <p>• Ofereça flexibilidade (ex: cancelamento sem burocracia)</p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-red-200 bg-red-50">
+              <CardHeader>
+                <CardTitle className="text-lg text-red-900">5. Crie Senso de Urgência (Suave)</CardTitle>
+              </CardHeader>
+              <CardContent className="text-sm text-red-800">
+                <p className="mb-2">• Mencione benefícios de agir agora</p>
+                <p className="mb-2">• Não pressione demais - respeite o tempo do cliente</p>
+                <p>• Deixe claro que é uma oportunidade, não uma obrigação</p>
+              </CardContent>
+            </Card>
+
+            <div className="bg-muted p-4 rounded-lg border-2 border-primary">
+              <p className="text-sm font-semibold text-primary mb-2">💡 Lembre-se:</p>
+              <p className="text-sm">
+                O timing é essencial. Não ofereça produtos logo no início da conversa. 
+                Primeiro construa confiança, depois identifique necessidades, e só então apresente soluções personalizadas.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex justify-end mt-6">
+            <Button onClick={() => setShowTipsDialog(false)}>
+              Entendi, vamos tentar novamente!
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <div className="max-w-5xl mx-auto py-8">
         <Button variant="ghost" onClick={onBack} className="mb-6">
           <ArrowLeft className="w-4 h-4 mr-2" />
