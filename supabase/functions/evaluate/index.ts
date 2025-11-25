@@ -112,13 +112,28 @@ FORMATO DA RESPOSTA (JSON):
     const data = await response.json();
     let aiResponse = data.choices[0].message.content;
 
-    // Extract JSON from response (handle markdown code blocks)
-    const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      aiResponse = jsonMatch[0];
+    // Extract JSON from response (handle markdown code blocks and extra text)
+    let jsonString = aiResponse;
+
+    // Try to extract from code block first
+    const codeBlockMatch = aiResponse.match(/```(?:json)?\s*(\{[\s\S]*?\})\s*```/);
+    if (codeBlockMatch) {
+      jsonString = codeBlockMatch[1];
+    } else {
+      // Try to find JSON object
+      const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        jsonString = jsonMatch[0];
+      }
     }
 
-    const evaluation = JSON.parse(aiResponse);
+    // Clean up any trailing content after the last closing brace
+    const lastBraceIndex = jsonString.lastIndexOf('}');
+    if (lastBraceIndex !== -1) {
+      jsonString = jsonString.substring(0, lastBraceIndex + 1);
+    }
+
+    const evaluation = JSON.parse(jsonString);
 
     return new Response(
       JSON.stringify(evaluation),
