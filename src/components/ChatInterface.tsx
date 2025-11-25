@@ -30,6 +30,8 @@ const ChatInterface = ({ scenario, customerProfile, processId, onBack }: ChatInt
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const [startY, setStartY] = useState<number | null>(null);
+  const [timingSuggestion, setTimingSuggestion] = useState<string | null>(null);
+  const [showSuggestion, setShowSuggestion] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const recordingTimerRef = useRef<NodeJS.Timeout | null>(null);
   const micButtonRef = useRef<HTMLButtonElement>(null);
@@ -245,6 +247,11 @@ const ChatInterface = ({ scenario, customerProfile, processId, onBack }: ChatInt
           .eq('id', conversationId);
       }
 
+      // Verificar se é um bom momento para sugerir venda
+      if (finalMessages.length >= 4 && finalMessages.length % 2 === 0) {
+        checkTimingSuggestion(finalMessages);
+      }
+
     } catch (error: any) {
       console.error('Error sending message:', error);
       toast({
@@ -254,6 +261,35 @@ const ChatInterface = ({ scenario, customerProfile, processId, onBack }: ChatInt
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const checkTimingSuggestion = async (currentMessages: Message[]) => {
+    try {
+      const { data, error } = await supabase.functions.invoke('suggest-timing', {
+        body: {
+          messages: currentMessages,
+          scenario,
+          customerProfile,
+        },
+      });
+
+      if (error) {
+        console.error('Error checking timing:', error);
+        return;
+      }
+
+      if (data.should_suggest && data.suggestion && data.timing_score >= 60) {
+        setTimingSuggestion(data.suggestion);
+        setShowSuggestion(true);
+        
+        // Auto-hide após 15 segundos
+        setTimeout(() => {
+          setShowSuggestion(false);
+        }, 15000);
+      }
+    } catch (error) {
+      console.error('Error checking timing suggestion:', error);
     }
   };
 
@@ -338,6 +374,29 @@ const ChatInterface = ({ scenario, customerProfile, processId, onBack }: ChatInt
         {/* Messages */}
         <div className="flex-1 bg-card p-4 overflow-y-auto">
           <div className="space-y-4">
+            {/* Sugestão de Timing */}
+            {showSuggestion && timingSuggestion && (
+              <div className="bg-gradient-to-r from-yellow-50 to-amber-50 border-2 border-yellow-400 rounded-lg p-4 shadow-lg animate-in slide-in-from-top">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center flex-shrink-0">
+                    <span className="text-2xl">💡</span>
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-yellow-900 mb-1">Dica de Abordagem</h4>
+                    <p className="text-sm text-yellow-800">{timingSuggestion}</p>
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => setShowSuggestion(false)}
+                    className="text-yellow-700 hover:text-yellow-900"
+                  >
+                    ✕
+                  </Button>
+                </div>
+              </div>
+            )}
+
             {messages.map((message, index) => (
               <div
                 key={index}
