@@ -24,37 +24,59 @@ serve(async (req) => {
 CENÁRIO: ${scenario}
 PERFIL DO CLIENTE: ${customerProfile}
 
-Analise a conversa abaixo e avalie a qualidade do atendimento do operador.
+Analise a conversa abaixo e avalie a conduta do operador com base em princípios fundamentais de atendimento.
 
 TRANSCRIÇÃO DA CONVERSA:
 ${transcript.map((msg: any) => `${msg.role === 'user' ? 'ATENDENTE' : 'CLIENTE'}: ${msg.content}`).join('\n')}
 
-INSTRUÇÕES:
-1. Dê uma nota CSAT de 1 a 5 (1=Péssimo, 5=Excelente)
-2. Identifique PONTOS POSITIVOS do atendimento (máximo 3)
-3. Identifique OPORTUNIDADES DE MELHORIA (máximo 3)
-4. Para cada oportunidade, forneça um EXEMPLO ESPECÍFICO de como o atendente poderia ter respondido melhor, citando a parte exata da conversa
+INSTRUÇÕES DE AVALIAÇÃO:
 
-Critérios de avaliação:
-- Empatia e acolhimento
-- Clareza na comunicação
-- Resolutividade
-- Tempo de resposta
-- Profissionalismo
-- Uso de linguagem positiva
+Avalie o atendente nos seguintes princípios (nota de 0 a 10 para cada):
+
+1. ACOLHIMENTO: O atendente demonstrou receptividade, cordialidade e disposição para ajudar desde o início?
+2. EMPATIA: O atendente compreendeu as emoções e necessidades do cliente, demonstrando sensibilidade?
+3. RESOLUTIVIDADE: O atendente foi eficaz em resolver o problema ou encaminhar adequadamente?
+4. ARGUMENTAÇÃO: O atendente apresentou argumentos claros, lógicos e convincentes para a oferta/solução?
+5. CONTRA-ARGUMENTAÇÃO: O atendente soube lidar com objeções, dúvidas e resistências do cliente de forma adequada?
+
+AVALIAÇÃO DA ABORDAGEM DE VENDA:
+- Avalie se a abordagem de venda foi adequada ao perfil do cliente
+- Considere timing, tom, técnicas utilizadas e respeito ao cliente
+- Classifique como: "Excelente", "Boa", "Aceitável", "Inadequada" ou "Não se aplica"
+
+PROBABILIDADE DE ACEITAÇÃO:
+- Com base no desenrolar da conversa, estime a probabilidade (0-100%) de o cliente aceitar a oferta
+- Considere sinais de interesse, objeções levantadas e engajamento
+
+FEEDBACKS PARA MELHORIA:
+- Forneça 3-5 feedbacks específicos e acionáveis
+- Cada feedback deve incluir: o princípio relacionado, o que foi observado, e como melhorar
+- Cite trechos específicos da conversa quando relevante
 
 FORMATO DA RESPOSTA (JSON):
 {
-  "csat": número de 1 a 5,
-  "pontos_positivos": ["ponto 1", "ponto 2", "ponto 3"],
-  "oportunidades": [
+  "principios": {
+    "acolhimento": { "nota": número 0-10, "observacao": "breve observação" },
+    "empatia": { "nota": número 0-10, "observacao": "breve observação" },
+    "resolutividade": { "nota": número 0-10, "observacao": "breve observação" },
+    "argumentacao": { "nota": número 0-10, "observacao": "breve observação" },
+    "contra_argumentacao": { "nota": número 0-10, "observacao": "breve observação" }
+  },
+  "abordagem_venda": {
+    "classificacao": "Excelente | Boa | Aceitável | Inadequada | Não se aplica",
+    "justificativa": "explicação detalhada da classificação"
+  },
+  "probabilidade_aceitacao": número 0-100,
+  "justificativa_probabilidade": "explicação da probabilidade estimada",
+  "feedbacks": [
     {
-      "area": "Nome da área de melhoria",
-      "trecho_original": "Trecho exato do que o atendente disse",
-      "sugestao": "Como o atendente poderia ter dito"
+      "principio": "nome do princípio relacionado",
+      "observacao": "o que foi observado no atendimento",
+      "sugestao": "como melhorar especificamente",
+      "trecho_exemplo": "trecho da conversa (se aplicável)"
     }
   ],
-  "resumo": "Resumo geral da avaliação em 2-3 frases"
+  "resumo_geral": "Resumo executivo da avaliação em 2-3 frases"
 }`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
