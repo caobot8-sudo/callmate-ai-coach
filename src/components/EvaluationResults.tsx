@@ -4,35 +4,40 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { TrendingUp, Heart, CheckCircle2, MessageSquare, Shield, ArrowLeft, Target, Lightbulb } from "lucide-react";
+import { TrendingUp, Clock, Target, MessageSquare, Shield, ArrowLeft, Lightbulb, AlertCircle } from "lucide-react";
 
-interface Principio {
+interface Criterio {
   nota: number;
   observacao: string;
 }
 
+interface DorNaoExplorada {
+  dor_identificada: string;
+  produto_sugerido: string;
+  momento_ideal: string;
+}
+
 interface Feedback {
-  principio: string;
+  area: string;
   observacao: string;
+  impacto: string;
   sugestao: string;
-  trecho_exemplo?: string;
 }
 
 interface EvaluationProps {
   evaluation: {
-    principios: {
-      acolhimento: Principio;
-      empatia: Principio;
-      resolutividade: Principio;
-      argumentacao: Principio;
-      contra_argumentacao: Principio;
+    criterios: {
+      resolucao_demanda: Criterio;
+      timing_abordagem: Criterio;
+      identificacao_necessidades: Criterio;
+      tecnica_apresentacao: Criterio;
+      tratamento_objecoes: Criterio;
     };
-    abordagem_venda: {
-      classificacao: string;
-      justificativa: string;
-    };
+    timing_classificacao: string;
+    timing_justificativa: string;
     probabilidade_aceitacao: number;
     justificativa_probabilidade: string;
+    dores_nao_exploradas?: DorNaoExplorada[];
     feedbacks: Feedback[];
     resumo_geral: string;
   };
@@ -43,7 +48,6 @@ const EvaluationResults = ({ evaluation, onBack }: EvaluationProps) => {
   const [showTipsDialog, setShowTipsDialog] = useState(false);
 
   useEffect(() => {
-    // Mostrar popup de dicas se probabilidade de aceitação for muito baixa
     if (evaluation.probabilidade_aceitacao <= 20) {
       setShowTipsDialog(true);
     }
@@ -56,12 +60,12 @@ const EvaluationResults = ({ evaluation, onBack }: EvaluationProps) => {
     return "text-red-600";
   };
 
-  const getClassificacaoColor = (classificacao: string) => {
-    if (classificacao === "Excelente") return "text-green-600 bg-green-50 border-green-200";
-    if (classificacao === "Boa") return "text-blue-600 bg-blue-50 border-blue-200";
-    if (classificacao === "Aceitável") return "text-yellow-600 bg-yellow-50 border-yellow-200";
-    if (classificacao === "Inadequada") return "text-red-600 bg-red-50 border-red-200";
-    return "text-gray-600 bg-gray-50 border-gray-200";
+  const getTimingColor = (classificacao: string) => {
+    if (classificacao === "Excelente") return "bg-green-50 text-green-700 border-green-200";
+    if (classificacao === "Bom") return "bg-blue-50 text-blue-700 border-blue-200";
+    if (classificacao === "Prematuro") return "bg-orange-50 text-orange-700 border-orange-200";
+    if (classificacao === "Tardio") return "bg-yellow-50 text-yellow-700 border-yellow-200";
+    return "bg-gray-50 text-gray-700 border-gray-200";
   };
 
   const getProbabilidadeColor = (prob: number) => {
@@ -70,100 +74,86 @@ const EvaluationResults = ({ evaluation, onBack }: EvaluationProps) => {
     return "text-red-600";
   };
 
-  const principiosConfig = [
-    { key: 'acolhimento', label: 'Acolhimento', icon: Heart },
-    { key: 'empatia', label: 'Empatia', icon: Heart },
-    { key: 'resolutividade', label: 'Resolutividade', icon: CheckCircle2 },
-    { key: 'argumentacao', label: 'Argumentação', icon: MessageSquare },
-    { key: 'contra_argumentacao', label: 'Contra-argumentação', icon: Shield },
+  const criteriosConfig = [
+    { key: 'resolucao_demanda', label: 'Resolução da Demanda', icon: Target },
+    { key: 'timing_abordagem', label: 'Timing da Abordagem', icon: Clock },
+    { key: 'identificacao_necessidades', label: 'Identificação de Necessidades', icon: Target },
+    { key: 'tecnica_apresentacao', label: 'Técnica de Apresentação', icon: MessageSquare },
+    { key: 'tratamento_objecoes', label: 'Tratamento de Objeções', icon: Shield },
   ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted p-4">
-      {/* Dialog de Dicas de Abordagem */}
+      {/* Dialog de Dicas */}
       <Dialog open={showTipsDialog} onOpenChange={setShowTipsDialog}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-2xl">
               <Lightbulb className="w-6 h-6 text-yellow-500" />
-              Dicas para Melhorar sua Abordagem
+              Dicas para Melhorar sua Abordagem Comercial
             </DialogTitle>
             <DialogDescription>
-              A probabilidade de aceitação está baixa. Aqui estão algumas orientações para melhorar sua técnica de venda:
+              A probabilidade de aceitação está baixa. Aqui estão orientações práticas:
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 mt-4">
-            <Card className="border-blue-200 bg-blue-50">
+            <Card className="border-primary/20 bg-primary/5">
               <CardHeader>
-                <CardTitle className="text-lg text-blue-900">1. Construa Rapport Antes de Vender</CardTitle>
+                <CardTitle className="text-lg">1. RESOLVA PRIMEIRO, VENDA DEPOIS</CardTitle>
               </CardHeader>
-              <CardContent className="text-sm text-blue-800">
-                <p className="mb-2">• Comece a conversa de forma natural e empática</p>
-                <p className="mb-2">• Demonstre interesse genuíno nas necessidades do cliente</p>
-                <p>• Crie conexão antes de apresentar produtos</p>
+              <CardContent className="text-sm">
+                <p className="mb-2">• Atenda a demanda inicial completamente antes de abordar vendas</p>
+                <p className="mb-2">• Cliente irritado ou apressado = momento ERRADO para vender</p>
+                <p>• Só ofereça após resolver o problema e sentir abertura</p>
               </CardContent>
             </Card>
 
-            <Card className="border-green-200 bg-green-50">
+            <Card className="border-primary/20 bg-primary/5">
               <CardHeader>
-                <CardTitle className="text-lg text-green-900">2. Identifique Necessidades Primeiro</CardTitle>
+                <CardTitle className="text-lg">2. IDENTIFIQUE NECESSIDADES COM PERGUNTAS</CardTitle>
               </CardHeader>
-              <CardContent className="text-sm text-green-800">
-                <p className="mb-2">• Faça perguntas abertas sobre a situação do cliente</p>
-                <p className="mb-2">• Ouça ativamente e identifique pontos de dor</p>
-                <p>• Só ofereça soluções que fazem sentido para o perfil</p>
+              <CardContent className="text-sm">
+                <p className="mb-2">• "Como você costuma usar seu cartão?"</p>
+                <p className="mb-2">• "Você tem alguma preocupação com segurança?"</p>
+                <p>• Ouça as respostas e conecte com produtos relevantes</p>
               </CardContent>
             </Card>
 
-            <Card className="border-purple-200 bg-purple-50">
+            <Card className="border-primary/20 bg-primary/5">
               <CardHeader>
-                <CardTitle className="text-lg text-purple-900">3. Apresente Benefícios, Não Apenas Produtos</CardTitle>
+                <CardTitle className="text-lg">3. APRESENTE BENEFÍCIOS, NÃO PRODUTOS</CardTitle>
               </CardHeader>
-              <CardContent className="text-sm text-purple-800">
-                <p className="mb-2">• Conecte o produto com as necessidades identificadas</p>
-                <p className="mb-2">• Fale em termos de proteção, segurança e tranquilidade</p>
-                <p>• Use exemplos práticos e relevantes</p>
+              <CardContent className="text-sm">
+                <p className="mb-2">• ❌ "Temos o cartão Gold que custa R$ 50/mês"</p>
+                <p className="mb-2">• ✅ "Você teria proteção contra fraudes e cashback em suas compras"</p>
+                <p>• Foque no valor para a vida do cliente</p>
               </CardContent>
             </Card>
 
-            <Card className="border-orange-200 bg-orange-50">
+            <Card className="border-primary/20 bg-primary/5">
               <CardHeader>
-                <CardTitle className="text-lg text-orange-900">4. Antecipe e Trate Objeções</CardTitle>
+                <CardTitle className="text-lg">4. TRATE OBJEÇÕES COM EMPATIA + DADOS</CardTitle>
               </CardHeader>
-              <CardContent className="text-sm text-orange-800">
-                <p className="mb-2">• Valide a preocupação do cliente antes de contra-argumentar</p>
-                <p className="mb-2">• Use técnicas como "Entendo que..." antes de explicar</p>
-                <p className="mb-2">• Forneça dados concretos quando possível</p>
-                <p>• Ofereça flexibilidade (ex: cancelamento sem burocracia)</p>
+              <CardContent className="text-sm">
+                <p className="mb-2">• Cliente: "Tá caro"</p>
+                <p className="mb-2">• Você: "Entendo sua preocupação. Na verdade, com o cashback de 2%, o custo se paga em compras que você já faz"</p>
+                <p>• Valide + Eduque + Mostre valor real</p>
               </CardContent>
             </Card>
 
-            <Card className="border-red-200 bg-red-50">
-              <CardHeader>
-                <CardTitle className="text-lg text-red-900">5. Crie Senso de Urgência (Suave)</CardTitle>
-              </CardHeader>
-              <CardContent className="text-sm text-red-800">
-                <p className="mb-2">• Mencione benefícios de agir agora</p>
-                <p className="mb-2">• Não pressione demais - respeite o tempo do cliente</p>
-                <p>• Deixe claro que é uma oportunidade, não uma obrigação</p>
-              </CardContent>
-            </Card>
-
-            <div className="bg-muted p-4 rounded-lg border-2 border-primary">
-              <p className="text-sm font-semibold text-primary mb-2">💡 Lembre-se:</p>
+            <div className="bg-primary/10 p-4 rounded-lg border-2 border-primary/30">
+              <p className="text-sm font-semibold mb-2">💡 REGRA DE OURO:</p>
               <p className="text-sm">
-                O timing é essencial. Não ofereça produtos logo no início da conversa. 
-                Primeiro construa confiança, depois identifique necessidades, e só então apresente soluções personalizadas.
+                O melhor vendedor é aquele que o cliente NEM PERCEBE que está vendendo. 
+                Seja consultivo, não invasivo. Vendas acontecem naturalmente quando você resolve problemas reais.
               </p>
             </div>
           </div>
 
-          <div className="flex justify-end mt-6">
-            <Button onClick={() => setShowTipsDialog(false)}>
-              Entendi, vamos tentar novamente!
-            </Button>
-          </div>
+          <Button onClick={() => setShowTipsDialog(false)} className="w-full mt-4">
+            Entendi, vamos tentar novamente!
+          </Button>
         </DialogContent>
       </Dialog>
 
@@ -173,83 +163,52 @@ const EvaluationResults = ({ evaluation, onBack }: EvaluationProps) => {
           Nova Simulação
         </Button>
 
-        {/* Resumo Geral */}
-        <Card className="mb-6 border-2 shadow-elegant">
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl mb-2">Avaliação do Atendimento</CardTitle>
-            <CardDescription className="text-base">
+        {/* Header com Resumo */}
+        <Card className="mb-8 border-2 shadow-elegant bg-gradient-card">
+          <CardHeader>
+            <CardTitle className="text-3xl text-primary flex items-center gap-3">
+              <TrendingUp className="w-8 h-8" />
+              Avaliação de Performance Comercial
+            </CardTitle>
+            <CardDescription className="text-base mt-2">
               {evaluation.resumo_geral}
             </CardDescription>
           </CardHeader>
         </Card>
 
-        {/* Princípios Avaliados */}
-        <Card className="mb-6 shadow-elegant">
-          <CardHeader>
-            <CardTitle className="text-xl flex items-center gap-2">
-              <TrendingUp className="w-6 h-6" />
-              Avaliação por Princípios
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-6">
-              {principiosConfig.map(({ key, label, icon: Icon }) => {
-                const principio = evaluation.principios[key as keyof typeof evaluation.principios];
-                return (
-                  <div key={key} className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Icon className="w-5 h-5 text-muted-foreground" />
-                        <span className="font-semibold">{label}</span>
-                      </div>
-                      <span className={`text-lg font-bold ${getScoreColor(principio.nota)}`}>
-                        {principio.nota}/10
-                      </span>
-                    </div>
-                    <Progress value={principio.nota * 10} className="h-2" />
-                    <p className="text-sm text-muted-foreground">{principio.observacao}</p>
-                  </div>
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Abordagem de Venda e Probabilidade */}
-        <div className="grid md:grid-cols-2 gap-6 mb-6">
-          {/* Abordagem de Venda */}
-          <Card className="shadow-elegant">
+        {/* Timing e Probabilidade */}
+        <div className="grid md:grid-cols-2 gap-6 mb-8">
+          <Card className="border-2 shadow-elegant">
             <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <MessageSquare className="w-5 h-5" />
-                Abordagem de Venda
+              <CardTitle className="flex items-center gap-2">
+                <Clock className="w-5 h-5 text-primary" />
+                Timing da Abordagem
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <Badge className={`text-sm px-3 py-1 ${getClassificacaoColor(evaluation.abordagem_venda.classificacao)}`}>
-                {evaluation.abordagem_venda.classificacao}
+              <Badge className={`${getTimingColor(evaluation.timing_classificacao)} text-lg py-2 px-4`}>
+                {evaluation.timing_classificacao}
               </Badge>
               <p className="text-sm text-muted-foreground mt-3">
-                {evaluation.abordagem_venda.justificativa}
+                {evaluation.timing_justificativa}
               </p>
             </CardContent>
           </Card>
 
-          {/* Probabilidade de Aceitação */}
-          <Card className="shadow-elegant">
+          <Card className="border-2 shadow-elegant">
             <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Target className="w-5 h-5" />
+              <CardTitle className="flex items-center gap-2">
+                <Target className="w-5 h-5 text-primary" />
                 Probabilidade de Aceitação
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-center mb-3">
+              <div className="flex items-baseline gap-2 mb-3">
                 <span className={`text-4xl font-bold ${getProbabilidadeColor(evaluation.probabilidade_aceitacao)}`}>
                   {evaluation.probabilidade_aceitacao}%
                 </span>
               </div>
-              <Progress value={evaluation.probabilidade_aceitacao} className="h-2 mb-3" />
+              <Progress value={evaluation.probabilidade_aceitacao} className="mb-3" />
               <p className="text-sm text-muted-foreground">
                 {evaluation.justificativa_probabilidade}
               </p>
@@ -257,55 +216,102 @@ const EvaluationResults = ({ evaluation, onBack }: EvaluationProps) => {
           </Card>
         </div>
 
-        {/* Feedbacks para Melhoria */}
-        <Card className="shadow-elegant">
+        {/* Critérios de Avaliação */}
+        <Card className="mb-8 border-2 shadow-elegant">
           <CardHeader>
-            <CardTitle className="text-xl flex items-center gap-2">
-              <CheckCircle2 className="w-6 h-6 text-secondary" />
-              Feedbacks para Melhoria
-            </CardTitle>
+            <CardTitle className="text-xl">Critérios de Avaliação</CardTitle>
+            <CardDescription>Performance detalhada por área</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
+              {criteriosConfig.map(({ key, label, icon: Icon }) => {
+                const criterio = evaluation.criterios[key as keyof typeof evaluation.criterios];
+                return (
+                  <div key={key} className="pb-6 border-b last:border-b-0">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <Icon className="w-5 h-5 text-primary" />
+                        <h3 className="font-semibold text-lg">{label}</h3>
+                      </div>
+                      <span className={`text-2xl font-bold ${getScoreColor(criterio.nota)}`}>
+                        {criterio.nota}/10
+                      </span>
+                    </div>
+                    <Progress value={criterio.nota * 10} className="mb-2" />
+                    <p className="text-sm text-muted-foreground">{criterio.observacao}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Dores Não Exploradas */}
+        {evaluation.dores_nao_exploradas && evaluation.dores_nao_exploradas.length > 0 && (
+          <Card className="mb-8 border-2 shadow-elegant border-orange-200 bg-orange-50/50">
+            <CardHeader>
+              <CardTitle className="text-xl flex items-center gap-2 text-orange-900">
+                <AlertCircle className="w-5 h-5" />
+                Oportunidades Perdidas
+              </CardTitle>
+              <CardDescription>Necessidades do cliente que não foram abordadas</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {evaluation.dores_nao_exploradas.map((dor, index) => (
+                  <div key={index} className="bg-white p-4 rounded-lg border border-orange-200">
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 rounded-full bg-orange-200 text-orange-800 flex items-center justify-center font-bold flex-shrink-0">
+                        {index + 1}
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-semibold text-orange-900 mb-1">
+                          {dor.dor_identificada}
+                        </p>
+                        <p className="text-sm text-orange-800 mb-1">
+                          <strong>Produto sugerido:</strong> {dor.produto_sugerido}
+                        </p>
+                        <p className="text-sm text-orange-700">
+                          <strong>Momento ideal:</strong> {dor.momento_ideal}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Feedbacks */}
+        <Card className="border-2 shadow-elegant">
+          <CardHeader>
+            <CardTitle className="text-xl">Feedbacks para Melhoria</CardTitle>
+            <CardDescription>Ações específicas para aprimorar sua técnica comercial</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
               {evaluation.feedbacks.map((feedback, index) => (
-                <div key={index} className="border-l-4 border-secondary pl-4 py-2 space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="text-xs">
-                      {feedback.principio}
+                <div key={index} className="p-4 bg-muted rounded-lg border">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Badge variant="outline" className="font-semibold">
+                      {feedback.area}
                     </Badge>
                   </div>
-                  
-                  <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
-                    <p className="text-xs font-semibold text-blue-700 mb-1">Observação:</p>
-                    <p className="text-sm text-blue-900">{feedback.observacao}</p>
-                  </div>
-                  
-                  <div className="bg-green-50 p-3 rounded-lg border border-green-200">
-                    <p className="text-xs font-semibold text-green-700 mb-1">Sugestão:</p>
-                    <p className="text-sm text-green-900">{feedback.sugestao}</p>
-                  </div>
-
-                  {feedback.trecho_exemplo && (
-                    <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
-                      <p className="text-xs font-semibold text-gray-700 mb-1">Exemplo da conversa:</p>
-                      <p className="text-sm text-gray-900 italic">"{feedback.trecho_exemplo}"</p>
-                    </div>
-                  )}
+                  <p className="text-sm mb-2">
+                    <strong>O que foi observado:</strong> {feedback.observacao}
+                  </p>
+                  <p className="text-sm mb-2 text-orange-700">
+                    <strong>Impacto:</strong> {feedback.impacto}
+                  </p>
+                  <p className="text-sm text-green-700">
+                    <strong>Como melhorar:</strong> {feedback.sugestao}
+                  </p>
                 </div>
               ))}
             </div>
           </CardContent>
         </Card>
-
-        <div className="flex justify-center mt-8">
-          <Button
-            size="lg"
-            className="bg-gradient-primary text-white hover:opacity-90 shadow-glow"
-            onClick={onBack}
-          >
-            Fazer Nova Simulação
-          </Button>
-        </div>
       </div>
     </div>
   );

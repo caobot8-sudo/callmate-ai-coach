@@ -19,78 +19,111 @@ serve(async (req) => {
     }
 
     // System prompt for evaluation
-    const evaluationPrompt = `Você é um avaliador especialista em atendimento ao cliente de call center bancário.
+    const evaluationPrompt = `Você é um avaliador especialista em vendas e atendimento bancário do Bradesco.
 
 CENÁRIO: ${scenario}
 PERFIL DO CLIENTE: ${customerProfile}
 
-Analise a conversa abaixo e avalie a conduta do operador com base em princípios fundamentais de atendimento.
+Analise a conversa focando em TIMING DE ABORDAGEM, TÉCNICA COMERCIAL e TRATAMENTO DE OBJEÇÕES.
 
 TRANSCRIÇÃO DA CONVERSA:
 ${transcript.map((msg: any) => `${msg.role === 'user' ? 'ATENDENTE' : 'CLIENTE'}: ${msg.content}`).join('\n')}
 
-INSTRUÇÕES DE AVALIAÇÃO:
+CRITÉRIOS DE AVALIAÇÃO (nota 0-10):
 
-Avalie o atendente nos seguintes princípios (nota de 0 a 10 para cada):
+1. RESOLUÇÃO DA DEMANDA INICIAL: O atendente resolveu ou encaminhou adequadamente o problema que motivou o contato?
 
-1. ACOLHIMENTO: O atendente demonstrou receptividade, cordialidade e disposição para ajudar desde o início?
-2. EMPATIA: O atendente compreendeu as emoções e necessidades do cliente, demonstrando sensibilidade?
-3. RESOLUTIVIDADE: O atendente foi eficaz em resolver o problema ou encaminhar adequadamente?
-4. ARGUMENTAÇÃO: O atendente apresentou argumentos claros, lógicos e convincentes para a oferta/solução?
-5. CONTRA-ARGUMENTAÇÃO: O atendente soube lidar com objeções, dúvidas e resistências do cliente de forma adequada?
+2. TIMING DA ABORDAGEM COMERCIAL: 
+   - Abordou produtos no momento certo (após criar rapport e resolver a demanda)?
+   - Evitou ser invasivo ou prematuro?
+   - Identificou sinais de abertura do cliente?
 
-AVALIAÇÃO DA ABORDAGEM DE VENDA:
-- Avalie se a abordagem de venda foi adequada ao perfil do cliente
-- Considere timing, tom, técnicas utilizadas e respeito ao cliente
-- Classifique como: "Excelente", "Boa", "Aceitável", "Inadequada" ou "Não se aplica"
+3. IDENTIFICAÇÃO DE NECESSIDADES:
+   - Fez perguntas para entender a situação do cliente?
+   - Identificou dores ou oportunidades antes de oferecer?
+   - Personalizou a abordagem baseado no perfil?
 
-TRATAMENTO DE OBJEÇÕES (MUITO IMPORTANTE):
-- Quando o cliente apresenta objeções (ex: "está caro", "não tenho interesse"), avalie se o atendente:
-  * Validou a preocupação do cliente
-  * Apresentou contra-argumentos relevantes (ex: valores, comparações, benefícios)
-  * Ofereceu alternativas ou soluções
-- IMPORTANTE: Se o atendente respondeu adequadamente às objeções com argumentos válidos, isso DEVE AUMENTAR a probabilidade de aceitação
-- Exemplo positivo: Cliente: "Está caro" → Atendente: "O valor é o menor do mercado, são apenas 12,99" = BOM tratamento de objeção
+4. TÉCNICA DE APRESENTAÇÃO:
+   - Apresentou benefícios (não apenas características)?
+   - Usou linguagem clara e persuasiva?
+   - Conectou o produto com necessidades reais do cliente?
 
-PROBABILIDADE DE ACEITAÇÃO:
-- Com base no desenrolar da conversa, estime a probabilidade (0-100%) de o cliente aceitar a oferta
-- CONSIDERE ESPECIALMENTE: 
-  * Sinais de interesse manifestados pelo cliente
-  * Como o atendente tratou as objeções (se tratou bem, aumenta a probabilidade)
-  * Qualidade dos argumentos apresentados
-  * Rapport e conexão estabelecida
-- IMPORTANTE: Uma objeção bem tratada NÃO deve resultar em probabilidade 0%. Se o atendente contra-argumentou adequadamente, a probabilidade deve ser no mínimo 30-40%
-- Uma conversa sem ofertas/vendas deve ter probabilidade 0% ("Não se aplica")
+5. TRATAMENTO DE OBJEÇÕES:
+   - Validou as preocupações do cliente?
+   - Apresentou contra-argumentos relevantes e convincentes?
+   - Ofereceu alternativas quando apropriado?
 
-FEEDBACKS PARA MELHORIA:
-- Forneça 3-5 feedbacks específicos e acionáveis
-- Cada feedback deve incluir: o princípio relacionado, o que foi observado, e como melhorar
-- Cite trechos específicos da conversa quando relevante
+ANÁLISE DE DORES NÃO ATENDIDAS:
+- Identifique quais dores ou preocupações do cliente NÃO foram abordadas
+- Liste oportunidades perdidas de venda ou argumentação
+- Exemplo: Cliente preocupado com segurança → não ofereceu seguro do cartão
+
+TIMING E MOMENTO DA ABORDAGEM:
+- Classifique o timing como: "Excelente", "Bom", "Prematuro", "Tardio" ou "Não houve abordagem"
+- Justifique: o atendente esperou o momento certo? Criou rapport antes? Resolveu a demanda primeiro?
+
+PROBABILIDADE DE ACEITAÇÃO DA OFERTA:
+Estime de 0-100% considerando:
+
+SINAIS POSITIVOS QUE AUMENTAM PROBABILIDADE:
++ Cliente fez perguntas sobre o produto (+15-25%)
++ Atendente tratou objeções com argumentos sólidos (+20-30%)
++ Houve personalização da oferta (+15-20%)
++ Cliente demonstrou abertura ("interessante", "pode ser", "me fala mais") (+25-35%)
++ Timing adequado da abordagem (+15-20%)
+
+SINAIS NEGATIVOS QUE REDUZEM PROBABILIDADE:
+- Abordagem muito prematura (-40-50%)
+- Objeções não tratadas ou mal tratadas (-30-40%)
+- Cliente demonstrou irritação ou pressa (-35-45%)
+- Falta de personalização/argumentos genéricos (-20-30%)
+- Não resolveu demanda inicial antes de vender (-40-50%)
+
+IMPORTANTE:
+- Uma conversa SEM abordagem comercial = 0% (justificativa: "Não houve oferta")
+- Uma abordagem MUITO PREMATURA = 0-15%
+- Objeção bem tratada com argumentos válidos = NO MÍNIMO 30-50%
+- Cliente engajado com perguntas = NO MÍNIMO 60-75%
+- NÃO seja generoso: cliente brasileiro é naturalmente cético com vendas bancárias
+
+DORES NÃO EXPLORADAS:
+- Liste 2-4 dores ou necessidades que o cliente demonstrou mas não foram abordadas
+- Para cada uma, sugira qual produto/serviço poderia ter sido oferecido
+
+FEEDBACKS PRÁTICOS:
+- Forneça 4-6 feedbacks específicos focados em VENDAS e TIMING
+- Priorize: momento da abordagem, tratamento de objeções, identificação de necessidades
+- Seja direto e acionável
 
 FORMATO DA RESPOSTA (JSON):
 {
-  "principios": {
-    "acolhimento": { "nota": número 0-10, "observacao": "breve observação" },
-    "empatia": { "nota": número 0-10, "observacao": "breve observação" },
-    "resolutividade": { "nota": número 0-10, "observacao": "breve observação" },
-    "argumentacao": { "nota": número 0-10, "observacao": "breve observação" },
-    "contra_argumentacao": { "nota": número 0-10, "observacao": "breve observação" }
+  "criterios": {
+    "resolucao_demanda": { "nota": 0-10, "observacao": "comentário breve" },
+    "timing_abordagem": { "nota": 0-10, "observacao": "quando abordou? foi adequado?" },
+    "identificacao_necessidades": { "nota": 0-10, "observacao": "fez perguntas? explorou dores?" },
+    "tecnica_apresentacao": { "nota": 0-10, "observacao": "como apresentou? focou em benefícios?" },
+    "tratamento_objecoes": { "nota": 0-10, "observacao": "como lidou com objeções?" }
   },
-  "abordagem_venda": {
-    "classificacao": "Excelente | Boa | Aceitável | Inadequada | Não se aplica",
-    "justificativa": "explicação detalhada da classificação"
-  },
-  "probabilidade_aceitacao": número 0-100,
-  "justificativa_probabilidade": "explicação da probabilidade estimada",
-  "feedbacks": [
+  "timing_classificacao": "Excelente | Bom | Prematuro | Tardio | Não houve abordagem",
+  "timing_justificativa": "por que essa classificação?",
+  "probabilidade_aceitacao": 0-100,
+  "justificativa_probabilidade": "análise detalhada usando os sinais positivos/negativos listados acima",
+  "dores_nao_exploradas": [
     {
-      "principio": "nome do princípio relacionado",
-      "observacao": "o que foi observado no atendimento",
-      "sugestao": "como melhorar especificamente",
-      "trecho_exemplo": "trecho da conversa (se aplicável)"
+      "dor_identificada": "descrição da dor/necessidade",
+      "produto_sugerido": "qual produto/serviço teria sido adequado",
+      "momento_ideal": "quando deveria ter sido oferecido"
     }
   ],
-  "resumo_geral": "Resumo executivo da avaliação em 2-3 frases"
+  "feedbacks": [
+    {
+      "area": "Timing | Objeções | Necessidades | Apresentação | Rapport",
+      "observacao": "o que foi feito",
+      "impacto": "qual foi o impacto disso",
+      "sugestao": "como melhorar especificamente"
+    }
+  ],
+  "resumo_geral": "Resumo executivo focado em performance comercial (2-3 frases)"
 }`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -159,10 +192,20 @@ FORMATO DA RESPOSTA (JSON):
     return new Response(
       JSON.stringify({ 
         error: error instanceof Error ? error.message : "Erro ao avaliar conversa",
-        csat: 3,
-        pontos_positivos: ["Não foi possível gerar avaliação completa"],
-        oportunidades: [],
-        resumo: "Ocorreu um erro ao processar a avaliação."
+        criterios: {
+          resolucao_demanda: { nota: 0, observacao: "Erro na avaliação" },
+          timing_abordagem: { nota: 0, observacao: "Erro na avaliação" },
+          identificacao_necessidades: { nota: 0, observacao: "Erro na avaliação" },
+          tecnica_apresentacao: { nota: 0, observacao: "Erro na avaliação" },
+          tratamento_objecoes: { nota: 0, observacao: "Erro na avaliação" }
+        },
+        timing_classificacao: "Não se aplica",
+        timing_justificativa: "Erro ao processar avaliação",
+        probabilidade_aceitacao: 0,
+        justificativa_probabilidade: "Não foi possível avaliar",
+        dores_nao_exploradas: [],
+        feedbacks: [],
+        resumo_geral: "Ocorreu um erro ao processar a avaliação."
       }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
