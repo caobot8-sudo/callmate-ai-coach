@@ -16,43 +16,43 @@ interface KnowledgeEntry {
 
 const scenarios = [
   {
-    id: "limite",
-    title: "Solicitação de Aumento de Limite",
-    description: "Cliente deseja aumentar o limite do cartão de crédito",
+    id: "consulta_saldo",
+    title: "Consulta de Saldo e Extrato",
+    description: "Cliente liga para consultar saldo. Oportunidade de oferecer produtos.",
     profiles: [
-      { id: "calmo", label: "Cliente Calmo", emotion: "😊" },
-      { id: "ansioso", label: "Cliente Ansioso", emotion: "😰" },
-      { id: "irritado", label: "Cliente Irritado", emotion: "😠" },
+      { id: "aberto", label: "Cliente Aberto a Ofertas", emotion: "😊" },
+      { id: "neutro", label: "Cliente Neutro", emotion: "😐" },
+      { id: "apressado", label: "Cliente com Pressa", emotion: "⏰" },
     ],
   },
   {
-    id: "cobranca",
-    title: "Contestação de Cobrança",
-    description: "Cliente contesta uma cobrança não reconhecida",
+    id: "problema_app",
+    title: "Problema com App Bradesco",
+    description: "Cliente com dificuldade no app. Chance de oferecer produtos digitais.",
     profiles: [
-      { id: "confuso", label: "Cliente Confuso", emotion: "🤔" },
-      { id: "preocupado", label: "Cliente Preocupado", emotion: "😟" },
-      { id: "irritado", label: "Cliente Muito Irritado", emotion: "😡" },
-    ],
-  },
-  {
-    id: "cartao",
-    title: "Problema com Cartão",
-    description: "Cliente com problema de cartão bloqueado ou não recebido",
-    profiles: [
-      { id: "calmo", label: "Cliente Calmo", emotion: "😊" },
-      { id: "urgente", label: "Cliente com Urgência", emotion: "⏰" },
+      { id: "paciente", label: "Cliente Paciente", emotion: "🙂" },
       { id: "frustrado", label: "Cliente Frustrado", emotion: "😤" },
+      { id: "confuso", label: "Cliente Confuso", emotion: "🤔" },
     ],
   },
   {
-    id: "credito",
-    title: "Solicitação de Crédito",
-    description: "Cliente interessado em contratar um empréstimo",
+    id: "renovacao_cartao",
+    title: "Renovação de Cartão",
+    description: "Cliente liga para renovar cartão. Momento ideal para upgrade.",
     profiles: [
-      { id: "empolgado", label: "Cliente Empolgado", emotion: "🤩" },
-      { id: "cauteloso", label: "Cliente Cauteloso", emotion: "🤨" },
-      { id: "desconfiado", label: "Cliente Desconfiado", emotion: "🧐" },
+      { id: "satisfeito", label: "Cliente Satisfeito", emotion: "😊" },
+      { id: "economico", label: "Cliente Econômico", emotion: "💰" },
+      { id: "premium", label: "Cliente Premium", emotion: "⭐" },
+    ],
+  },
+  {
+    id: "pagamento_fatura",
+    title: "Dúvida sobre Fatura",
+    description: "Cliente com dúvida sobre fatura. Oportunidade de parcelamento/crédito.",
+    profiles: [
+      { id: "tranquilo", label: "Cliente Tranquilo", emotion: "😌" },
+      { id: "preocupado", label: "Cliente Preocupado", emotion: "😟" },
+      { id: "interessado", label: "Cliente Interessado", emotion: "🤨" },
     ],
   },
 ];
@@ -114,10 +114,10 @@ const Index = () => {
             <MessageSquare className="w-10 h-10 text-white" />
           </div>
           <h1 className="text-4xl font-bold text-primary mb-3">
-            Simulador de Atendimento
+            Simulador de Atendimento Bradesco
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Treine suas habilidades de atendimento com simulações realistas baseadas em processos reais
+            Aprimore suas técnicas de atendimento e vendas com clientes simulados. Aprenda o melhor timing para oferecer produtos durante o atendimento.
           </p>
         </div>
 
@@ -144,11 +144,11 @@ const Index = () => {
               <Card className="border-2 shadow-elegant">
                 <CardHeader>
                   <Target className="w-8 h-8 text-secondary mb-2" />
-                  <CardTitle className="text-lg">Cenários Reais</CardTitle>
+                  <CardTitle className="text-lg">Atendimento Real</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <CardDescription>
-                    Pratique situações comuns do dia a dia com diferentes perfis de clientes
+                    Resolva demandas do cliente e identifique oportunidades de venda durante o atendimento
                   </CardDescription>
                 </CardContent>
               </Card>
@@ -156,11 +156,11 @@ const Index = () => {
               <Card className="border-2 shadow-elegant">
                 <CardHeader>
                   <MessageSquare className="w-8 h-8 text-secondary mb-2" />
-                  <CardTitle className="text-lg">IA Conversacional</CardTitle>
+                  <CardTitle className="text-lg">Cliente Simulado</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <CardDescription>
-                    Interaja com clientes simulados por inteligência artificial
+                    Cliente simulado por IA com objeções reais e perfis comportamentais variados
                   </CardDescription>
                 </CardContent>
               </Card>
@@ -168,11 +168,11 @@ const Index = () => {
               <Card className="border-2 shadow-elegant">
                 <CardHeader>
                   <TrendingUp className="w-8 h-8 text-secondary mb-2" />
-                  <CardTitle className="text-lg">Feedback Detalhado</CardTitle>
+                  <CardTitle className="text-lg">Análise de Performance</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <CardDescription>
-                    Receba avaliação CSAT e sugestões práticas de melhoria
+                    Avaliação detalhada do timing de venda, tratamento de objeções e técnicas comerciais
                   </CardDescription>
                 </CardContent>
               </Card>
