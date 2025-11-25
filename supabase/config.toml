@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.evaluate]
 verify_jwt = false
+
+[functions.suggest-timing]
+verify_jwt = false

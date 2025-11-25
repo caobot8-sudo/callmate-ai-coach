@@ -44,9 +44,23 @@ AVALIAÇÃO DA ABORDAGEM DE VENDA:
 - Considere timing, tom, técnicas utilizadas e respeito ao cliente
 - Classifique como: "Excelente", "Boa", "Aceitável", "Inadequada" ou "Não se aplica"
 
+TRATAMENTO DE OBJEÇÕES (MUITO IMPORTANTE):
+- Quando o cliente apresenta objeções (ex: "está caro", "não tenho interesse"), avalie se o atendente:
+  * Validou a preocupação do cliente
+  * Apresentou contra-argumentos relevantes (ex: valores, comparações, benefícios)
+  * Ofereceu alternativas ou soluções
+- IMPORTANTE: Se o atendente respondeu adequadamente às objeções com argumentos válidos, isso DEVE AUMENTAR a probabilidade de aceitação
+- Exemplo positivo: Cliente: "Está caro" → Atendente: "O valor é o menor do mercado, são apenas 12,99" = BOM tratamento de objeção
+
 PROBABILIDADE DE ACEITAÇÃO:
 - Com base no desenrolar da conversa, estime a probabilidade (0-100%) de o cliente aceitar a oferta
-- Considere sinais de interesse, objeções levantadas e engajamento
+- CONSIDERE ESPECIALMENTE: 
+  * Sinais de interesse manifestados pelo cliente
+  * Como o atendente tratou as objeções (se tratou bem, aumenta a probabilidade)
+  * Qualidade dos argumentos apresentados
+  * Rapport e conexão estabelecida
+- IMPORTANTE: Uma objeção bem tratada NÃO deve resultar em probabilidade 0%. Se o atendente contra-argumentou adequadamente, a probabilidade deve ser no mínimo 30-40%
+- Uma conversa sem ofertas/vendas deve ter probabilidade 0% ("Não se aplica")
 
 FEEDBACKS PARA MELHORIA:
 - Forneça 3-5 feedbacks específicos e acionáveis
